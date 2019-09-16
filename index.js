@@ -18,14 +18,19 @@ const argv = require('yargs')
     describe: 'How beats should be arranged, separated by commas. Leaving blank will remove from the song.',
     alias: 'm',
     default: '1,4,3,2'
+  })
+  .option('debug', {
+    describe: 'Debug logging'
   }).argv;
-
-console.log(argv);
 
 const WaveFile = require('wavefile');
 const path = require('path');
 const fs = require('fs');
 const input = fs.readFileSync(argv.input);
+
+function debug(func, ...args) {
+  if (argv.debug) console[func](...args);
+}
 
 void async function () {
   const wav = new WaveFile(input);
@@ -34,7 +39,7 @@ void async function () {
   const bitsPerSecond = rate * wav.fmt.blockAlign;
   const beatsPerSecond = argv.bpm / 60;
   const bitsPerBeat = Math.round(bitsPerSecond / beatsPerSecond);
-  console.log(bitsPerSecond, beatsPerSecond, bitsPerBeat);
+  debug('log', bitsPerSecond, beatsPerSecond, bitsPerBeat);
 
   const map = argv.map.toString().split(',').map(Number).map(n => n - 1);
 
