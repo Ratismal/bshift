@@ -45,7 +45,8 @@ void async function () {
   const rate = wav.fmt.sampleRate;
   const bitsPerSecond = rate * wav.fmt.blockAlign;
   const beatsPerSecond = argv.bpm / 60;
-  const bitsPerBeat = Math.ceil(bitsPerSecond / beatsPerSecond);
+  let bitsPerBeat = bitsPerSecond / beatsPerSecond;
+  // bitsPerBeat = bitsPerBeat % 2 === 0 ? Math.ceil(bitsPerBeat) : Math.floor(bitsPerBeat);
   debug('log', bitsPerSecond, beatsPerSecond, bitsPerBeat);
 
   const map = argv.map.toString().split(',').map(Number).map(n => n - 1);
@@ -59,7 +60,9 @@ void async function () {
   const BARS = Math.floor(wav.data.samples.length / bitsPerBeat / MAX_BEAT);
   const samples = wav.data.samples;
   for (let i = bitsPerBeat; i < samples.length; i += bitsPerBeat) {
-    beats.push(samples.slice(lastBeat, i));
+    let j = Math.floor(i) % 2 === 0 ? Math.floor(i) : Math.ceil(i);
+    console.log(j, i);
+    beats.push(samples.slice(lastBeat, j));
     if (++beat >= MAX_BEAT) {
       process.stdout.write(util.format('Processed bar %d/%d\r', ++bar, BARS));
       beat = 0;
@@ -71,7 +74,7 @@ void async function () {
       }
       beats = [];
     }
-    lastBeat = i;
+    lastBeat = j;
   }
   for (const mapping of map) {
     if (beats[mapping]) {
