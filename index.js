@@ -11,8 +11,13 @@ const argv = require('yargs')
   })
   .option('bpm', {
     describe: 'The BPM of the input file',
-    alias: 'b',
+    alias: 't',
     default: 120
+  })
+  .option('beats', {
+    describe: 'The number of beats per bar',
+    alias: 'b',
+    default: 4
   })
   .option('map', {
     describe: 'How beats should be arranged, separated by commas. Leaving blank will remove from the song.',
@@ -20,9 +25,11 @@ const argv = require('yargs')
     default: '1,4,3,2'
   })
   .option('debug', {
+    alias: 'd',
     describe: 'Debug logging'
   }).argv;
 
+const util = require('util');
 const WaveFile = require('wavefile');
 const path = require('path');
 const fs = require('fs');
@@ -47,11 +54,14 @@ void async function () {
   let beats = [];
   let lastBeat = 0;
   let beat = 0;
-  const MAX_BEAT = 4;
+  let bar = 0;
+  const MAX_BEAT = argv.beats;
+  const BARS = Math.floor(wav.data.samples.length / bitsPerBeat / MAX_BEAT);
   const samples = wav.data.samples;
   for (let i = bitsPerBeat; i < samples.length; i += bitsPerBeat) {
     beats.push(samples.slice(lastBeat, i));
-    if (++beat === MAX_BEAT) {
+    if (++beat >= MAX_BEAT) {
+      process.stdout.write(util.format('Processed bar %d/%d\r', ++bar, BARS));
       beat = 0;
       // add to o
       for (const mapping of map) {
@@ -68,6 +78,7 @@ void async function () {
       o = Buffer.concat([o, beats[mapping]]);
     }
   }
+  console.log('\nDone!');
 
   wav.data.samples = o;
 
