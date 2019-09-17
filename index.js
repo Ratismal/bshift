@@ -45,7 +45,7 @@ void async function () {
   const rate = wav.fmt.sampleRate;
   const bitsPerSecond = rate * wav.fmt.blockAlign;
   const beatsPerSecond = argv.bpm / 60;
-  const bitsPerBeat = Math.round(bitsPerSecond / beatsPerSecond);
+  const bitsPerBeat = Math.ceil(bitsPerSecond / beatsPerSecond);
   debug('log', bitsPerSecond, beatsPerSecond, bitsPerBeat);
 
   const map = argv.map.toString().split(',').map(Number).map(n => n - 1);
