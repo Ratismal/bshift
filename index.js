@@ -61,7 +61,7 @@ void async function () {
   const samples = wav.data.samples;
   for (let i = bitsPerBeat; i < samples.length; i += bitsPerBeat) {
     let j = Math.floor(i) % 2 === 0 ? Math.floor(i) : Math.ceil(i);
-    console.log(j, i);
+    // console.log(j, i);
     beats.push(samples.slice(lastBeat, j));
     if (++beat >= MAX_BEAT) {
       process.stdout.write(util.format('Processed bar %d/%d\r', ++bar, BARS));
