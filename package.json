@@ -6,5 +6,12 @@
   "dependencies": {
     "wavefile": "^8.4.6",
     "yargs": "^14.0.0"
+  },
+  "bin": "index.js",
+  "devDependencies": {
+    "pkg": "^4.4.0"
+  },
+  "scripts": {
+    "build": "pkg package.json --out-dir dist && echo done"
   }
 }
