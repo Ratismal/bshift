@@ -1,4 +1,8 @@
-const argv = require('yargs')
+let argv = require('yargs')
+  .option('config', {
+    describe: 'Configuration input',
+    alias: 'c'
+  })
   .option('input', {
     describe: 'File to beatshift',
     alias: 'i',
@@ -37,6 +41,15 @@ const util = require('util');
 const WaveFile = require('wavefile');
 const path = require('path');
 const fs = require('fs');
+
+if (argv.config) {
+  const config = JSON.parse(fs.readFileSync(argv.config));
+  argv = {
+    ...argv,
+    ...config
+  };
+}
+
 const input = fs.readFileSync(argv.input);
 
 function debug(func, ...args) {
