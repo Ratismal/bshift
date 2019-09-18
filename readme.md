@@ -1,6 +1,6 @@
 # bshift
 
-A simple commandline utility to reorganize beats with a wav file.
+A simple commandline utility to reorganize beats within a wav file.
 
 ## Considerations
 
