@@ -32,6 +32,10 @@ let argv = require('yargs')
     describe: 'Remove dead space from the beginning of the wav file',
     alias: 'T'
   })
+  .option('shuffle', {
+    describe: 'Shuffles the provided mapping every beat',
+    alias: 's'
+  })
   .option('debug', {
     alias: 'd',
     describe: 'Debug logging'
@@ -84,6 +88,8 @@ class WavProcessor {
     this.lastBeat = 0;
     this.i = 0;
 
+    this.script = [];
+
     this.output = Buffer.from([]);
   }
 
@@ -133,7 +139,24 @@ class WavProcessor {
     this.output = Buffer.concat([this.output, ...buffers]);
   }
 
+  shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
   mapBeats() {
+    if (argv.shuffle) {
+      this.shuffle(this.map);
+      this.script.push({
+        bytes: this.i,
+        bar: this.bar,
+        beat: this.bar * MAX_BEAT,
+        seconds: this.i / this.bytesPerSecond,
+        map: this.map.slice(0)
+      });
+    }
     let o = [];
     for (const m of this.map) {
       if (this.beats[m]) o.push(this.beats[m]);
@@ -170,4 +193,7 @@ void async function () {
   console.log('\nDone!');
 
   fs.writeFileSync(argv.output, processed.toBuffer());
+  if (argv.shuffle) {
+    fs.writeFileSync(argv.output + '.script.json', JSON.stringify(proc.script, null, 2));
+  }
 }();
