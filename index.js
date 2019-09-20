@@ -33,7 +33,7 @@ let argv = require('yargs')
     alias: 'T'
   })
   .option('shuffle', {
-    describe: 'Shuffles the provided mapping every beat',
+    describe: 'Shuffles the provided mapping every beat. Won\'t shuffle the first bar.',
     alias: 's'
   })
   .option('debug', {
@@ -147,22 +147,23 @@ class WavProcessor {
   }
 
   mapBeats() {
-    if (argv.shuffle) {
-      this.shuffle(this.map);
-      this.script.push({
-        bytes: this.i,
-        bar: this.bar,
-        beat: this.bar * MAX_BEAT,
-        seconds: this.i / this.bytesPerSecond,
-        map: this.map.slice(0)
-      });
-    }
     let o = [];
     for (const m of this.map) {
       if (this.beats[m]) o.push(this.beats[m]);
     }
     this.append(o);
     this.beats = [];
+    if (argv.shuffle) {
+      let bytes = this.i - (this.bytesPerBeat * MAX_BEAT);
+      this.script.push({
+        bytes,
+        bar: this.bar,
+        beat: this.bar * MAX_BEAT,
+        seconds: bytes / this.bytesPerSecond,
+        map: this.map.slice(0)
+      });
+      this.shuffle(this.map);
+    }
   }
 
   process() {
